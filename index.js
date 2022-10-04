@@ -2,19 +2,19 @@ const HtmlDocx = require('html-docx-js');
 const fs = require('fs');
 
 const generateMarkup = (document, {  orientation  = '', border = {}, header = {}, footer = {} }) =>{
-   
+
 
     let htmlContent = `<html>`;
-        // Starting Head Tags
-        htmlContent += `<head>`;
+    // Starting Head Tags
+    htmlContent += `<head>`;
 
-            // Default Style of the document
-            htmlContent += `<style>table { border-collapse: collapse; } table, td, th { border: 1px solid black; }</style>`;
-            
-            // Page Section Settings
-            htmlContent += `<style type="text/css"> 
+    // Default Style of the document
+    htmlContent += `<style>table { border-collapse: collapse; } table, td, th { border: 1px solid black; }</style>`;
+
+    // Page Section Settings
+    htmlContent += `<style type="text/css"> 
             @page Section1 {
-                margin:0.0in 0.0in 0.0in 0.0in;
+                margin:0in 0in 0in 0in;
                 mso-page-orientation:${orientation || 'portrait'} || ;
                 mso-header-margin:0.5in;
                 mso-header: h1;
@@ -23,56 +23,71 @@ const generateMarkup = (document, {  orientation  = '', border = {}, header = {}
                 mso-paper-source:0;
             }
             div.Section1 {page:Section1;}
-
+            div.MsoNormal{
+                mso-style-parent:"";
+                margin-top : ${border.top};
+                margin-bottom: ${border.bottom};
+                margin-left: ${border.left};
+                margin-right: ${border.right};
+                padding : 0px;
+                word-spacing: 0;
+                font-family:"Arial";
+                mso-fareast-font-family:"Arial";
+            }
+            pre, li, div, p, span, form, h1, h2, h3, h4, h5, h6, table, thead, th, tbody, tr, td, img, input, textarea, dd, dt, dl{
+                margin:0in;
+                padding : 0in;
+                word-spacing: 0;
+            }
+            ol, ul {
+                margin: 0 !important;
+                word-spacing: 0 !important;
+            }
             p.headerFooter { margin:0in; text-align: center; }
+            
             </style>`;
 
-        // Ending Head Tags
-        htmlContent += `</head>`;
-        
+    // Ending Head Tags
+    htmlContent += `</head>`;
 
-        // Start Body Tags
-        htmlContent += `<body>`;
-            // Start Page Section 
-            htmlContent += `<div class=Section1>`;
 
-                // Table 
-                htmlContent += `<table style='margin-left:50in; margin:0in 0in 0in 900in;'>`;
-                    htmlContent += `<tr style='height:1pt;mso-height-rule:exactly'>`;
-                        htmlContent += `<td>`;
-                            if(header?.contents?.default){
-                                htmlContent += `<div style='mso-element:header' id=h1>`;
-                                    htmlContent += `<p class=headerFooter>`;
-                                        htmlContent += `${header?.contents?.default}`;
-                                    htmlContent += `</p>`;
-                                htmlContent += '</div>';
-                            }
-                        htmlContent += `</td>`;
-                        htmlContent += ` <td>`;
-                            if(footer?.contents?.default){
-                                htmlContent += `<div style='mso-element:footer' id=f1>`;
-                                    htmlContent += `<p class=headerFooter>`;
-                                        htmlContent += `${footer?.contents?.default}`;
-                                    htmlContent += `</p>`;
-                                htmlContent += `</div>`;
-                            }
-                        htmlContent += `</td>`;
-                    htmlContent += `</tr>`;
-                htmlContent += '</table>';
-            
-                if(document.html){
-                    htmlContent += `${document.html}`;
-                }
-
-            htmlContent += `</div>`;
-        htmlContent += `</body>`;
+    // Start Body Tags
+    htmlContent += `<body>`;
+    // Start Page Section
+    htmlContent += `<div class=Section1>`;
+    // Table
+    htmlContent += `<table style='margin-left:50in; margin:0in 0in 0in 900in;'>`;
+    htmlContent += `<tr style='height:1pt;mso-height-rule:exactly'>`;
+    htmlContent += `<div>`;
+    if(header?.contents?.default){
+        htmlContent += `<div style='mso-element:header' id=h1>`;
+        htmlContent += `${header?.contents?.default}`;
+        htmlContent += '</div>';
+    }
+    htmlContent += `</div>`;
+    htmlContent += `<div>`;
+    if(footer?.contents?.default){
+        htmlContent += `<div style='mso-element:footer' id=f1>`;
+        htmlContent += `${footer?.contents?.default}`;
+        htmlContent += `</div>`;
+    }
+    htmlContent += `</div>`;
+    htmlContent += `</tr>`;
+    htmlContent += '</table>';
+    htmlContent += '<div class=MsoNormal>';
+    if(document.html){
+        htmlContent += `${document.html}`;
+    }
+    htmlContent += '</div>';
+    htmlContent += `</div>`;
+    htmlContent += `</body>`;
 
 
     htmlContent += `</html>`;
 
     return htmlContent;
 
-                
+
 
 }
 
@@ -105,8 +120,8 @@ const pageSize = async(pageFormat) =>{
                 pageSize = '14.8cm 21cm';
                 break;
 
-        } 
-        resolve(pageSize);  
+        }
+        resolve(pageSize);
     })
 }
 
