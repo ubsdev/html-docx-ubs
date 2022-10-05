@@ -3,16 +3,15 @@ const fs = require('fs');
 
 const generateMarkup = (document, {  orientation  = '', border = {}, header = {}, footer = {} }) =>{
 
-
     let htmlContent = `<html>`;
     // Starting Head Tags
     htmlContent += `<head>`;
 
     // Default Style of the document
-    htmlContent += `<style>table { border-collapse: collapse; } table, td, th { border: 1px solid black; }</style>`;
+    htmlContent += `<style type="text/css"  media="print">table { border-collapse: collapse; } table, td, th { border: 0px solid black; }</style>`;
 
     // Page Section Settings
-    htmlContent += `<style type="text/css"> 
+    htmlContent += `<style type="text/css"  media="print"> 
             @page Section1 {
                 margin:0in 0in 0in 0in;
                 mso-page-orientation:${orientation || 'portrait'} || ;
@@ -44,7 +43,26 @@ const generateMarkup = (document, {  orientation  = '', border = {}, header = {}
                 word-spacing: 0 !important;
             }
             p.headerFooter { margin:0in; text-align: center; }
-            
+
+            table#hrdftrtbl
+            {
+                margin:0in 0in 0in 900in;
+                width:1px;
+                height:1px;
+                overflow:hidden;
+                visibility: hidden;
+            }
+            table, tr, td{
+                border : 0px solid #FFF;
+            }
+            p.MsoFooter, li.MsoFooter, div.MsoFooter {
+                mso-pagination:widow-orphan;
+                tab-stops:center 3.0in right 6.0in;
+            }
+            p.MsoHeader, li.MsoHeader, div.MsoHeader {
+                mso-pagination:widow-orphan;
+                tab-stops:center 3.0in right 6.0in;
+            }
             </style>`;
 
     // Ending Head Tags
@@ -56,22 +74,34 @@ const generateMarkup = (document, {  orientation  = '', border = {}, header = {}
     // Start Page Section
     htmlContent += `<div class=Section1>`;
     // Table
-    htmlContent += `<table style='margin-left:50in; margin:0in 0in 0in 900in;'>`;
-    htmlContent += `<tr style='height:1pt;mso-height-rule:exactly'>`;
-    htmlContent += `<div>`;
+    htmlContent += `<table id='hrdftrtbl' border='1' cellspacing='0' cellpadding='0' style='margin-left:50in;visibility: hidden;'>`;
+    htmlContent += `<tr style='height:1pt;mso-height-rule:exactly;visibility: hidden;'>`;
+    htmlContent += `<td>`;
     if(header?.contents?.default){
         htmlContent += `<div style='mso-element:header' id=h1>`;
-        htmlContent += `${header?.contents?.default}`;
+            htmlContent += `<p class="MsoHeader">`;
+                htmlContent += `<table border="0" width= "100%" cellpadding="0" cellspacing="0" style="border-bottom:0px solid #736D6E">`;
+                    htmlContent += `<tr>`;
+                        htmlContent += `${header?.contents?.default}`;
+                    htmlContent += `</tr>`;
+                htmlContent += `</table>`;
+            htmlContent += `</p>`;
         htmlContent += '</div>';
     }
-    htmlContent += `</div>`;
-    htmlContent += `<div>`;
+    htmlContent += `</td>`;
+    htmlContent += `<td>`;
     if(footer?.contents?.default){
         htmlContent += `<div style='mso-element:footer' id=f1>`;
-        htmlContent += `${footer?.contents?.default}`;
+        htmlContent += `<p class="MsoFooter">`;   
+            htmlContent += `<table style="border-top: 0px solid black;" width="100%" cellpadding="0" cellspacing="0">`; 
+                htmlContent += `<tr>`;
+                    htmlContent += `${footer?.contents?.default}`;
+                htmlContent += `</tr>`;
+            htmlContent += `</table>`; 
+        htmlContent += `</p>`;
         htmlContent += `</div>`;
     }
-    htmlContent += `</div>`;
+    htmlContent += `</td>`;
     htmlContent += `</tr>`;
     htmlContent += '</table>';
     htmlContent += '<div class=MsoNormal>';
