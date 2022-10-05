@@ -1,7 +1,7 @@
 const HtmlDocx = require('html-docx-js');
 const fs = require('fs');
 
-const generateMarkup = (document, {  orientation  = '', border = {}, header = {}, footer = {} }) =>{
+const generateMarkup = (document, {  orientation  = '', border = {}, header = {}, footer = {}, pageNumberAlignment, pageNumberPosition }) =>{
 
     let htmlContent = `<html>`;
     // Starting Head Tags
@@ -14,7 +14,6 @@ const generateMarkup = (document, {  orientation  = '', border = {}, header = {}
     htmlContent += `<style type="text/css"  media="print"> 
             @page Section1 {
                 margin:0in 0in 0in 0in;
-                mso-page-orientation:${orientation || 'portrait'} || ;
                 mso-header-margin:0.5in;
                 mso-header: h1;
                 mso-footer-margin:0.5in;
@@ -28,14 +27,13 @@ const generateMarkup = (document, {  orientation  = '', border = {}, header = {}
                 margin-bottom: ${border.bottom};
                 margin-left: ${border.left};
                 margin-right: ${border.right};
-                padding : 0px;
                 word-spacing: 0;
                 font-family:"Arial";
                 mso-fareast-font-family:"Arial";
             }
             pre, li, div, p, span, form, h1, h2, h3, h4, h5, h6, table, thead, th, tbody, tr, td, img, input, textarea, dd, dt, dl{
                 margin:0in;
-                padding : 0in;
+                padding : 0in
                 word-spacing: 0;
             }
             ol, ul {
@@ -58,10 +56,12 @@ const generateMarkup = (document, {  orientation  = '', border = {}, header = {}
             p.MsoFooter, li.MsoFooter, div.MsoFooter {
                 mso-pagination:widow-orphan;
                 tab-stops:center 3.0in right 6.0in;
+                text-align : center;
             }
             p.MsoHeader, li.MsoHeader, div.MsoHeader {
                 mso-pagination:widow-orphan;
                 tab-stops:center 3.0in right 6.0in;
+                text-align : center;
             }
             </style>`;
 
@@ -72,7 +72,7 @@ const generateMarkup = (document, {  orientation  = '', border = {}, header = {}
     // Start Body Tags
     htmlContent += `<body>`;
     // Start Page Section
-    htmlContent += `<div class=Section1>`;
+    htmlContent += `<div class=Section1 style="margin:1in 1in 1in 1in">`;
     // Table
     htmlContent += `<table id='hrdftrtbl' border='1' cellspacing='0' cellpadding='0' style='margin-left:50in;visibility: hidden;'>`;
     htmlContent += `<tr style='height:1pt;mso-height-rule:exactly;visibility: hidden;'>`;
@@ -83,6 +83,9 @@ const generateMarkup = (document, {  orientation  = '', border = {}, header = {}
                 htmlContent += `<table border="0" width= "100%" cellpadding="0" cellspacing="0" style="border-bottom:0px solid #736D6E">`;
                     htmlContent += `<tr>`;
                         htmlContent += `${header?.contents?.default}`;
+                        if(pageNumberPosition === 'header'){
+                            htmlContent += `<td style="text-align:${pageNumberAlignment}"> - <span style='mso-field-code:" PAGE "'></span> - </td>`;
+                        }
                     htmlContent += `</tr>`;
                 htmlContent += `</table>`;
             htmlContent += `</p>`;
@@ -95,6 +98,9 @@ const generateMarkup = (document, {  orientation  = '', border = {}, header = {}
         htmlContent += `<p class="MsoFooter">`;   
             htmlContent += `<table style="border-top: 0px solid black;" width="100%" cellpadding="0" cellspacing="0">`; 
                 htmlContent += `<tr>`;
+                    if(pageNumberPosition === 'footer'){
+                        htmlContent += `<td style="text-align:${pageNumberAlignment}"> - <span style='mso-field-code:" PAGE "'></span> - </td>`;
+                    }
                     htmlContent += `${footer?.contents?.default}`;
                 htmlContent += `</tr>`;
             htmlContent += `</table>`; 
@@ -156,9 +162,9 @@ const pageSize = async(pageFormat) =>{
 }
 
 
-const createDoc = async (markupText, {format, orientation, border, header, footer, margins}) => {
+const createDoc = async (markupText, {format, orientation, border, header, footer, margins, pageNumberAlignment, pageNumberPosition}) => {
     return new Promise(async(resolve, reject) => {
-        const inputMarkup = generateMarkup(markupText, { orientation, border, header, footer,  })
+        const inputMarkup = generateMarkup(markupText, { orientation, border, header, footer, pageNumberAlignment, pageNumberPosition })
         var outputFileName = `${markupText.path}`;
         var docx = HtmlDocx.asBlob(inputMarkup, { orientation, margins : { ...margins }, size : format});
         fs.writeFile(outputFileName, docx, function (err) {
